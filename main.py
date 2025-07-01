@@ -9,6 +9,13 @@ RANK_VALUES = {
     'J': 11, 'Q': 12, 'K': 13, 'A': 14
 }
 
+# Mapeo inverso para mostrar los nombres de las cartas ---
+# Esto nos ayudará a convertir los valores numéricos de vuelta a sus denominaciones de carta
+VALUE_RANKS = {
+    2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: '10',
+    11: 'J', 12: 'Q', 13: 'K', 14: 'A', 1: 'A' # Para el As como 1 en la escalera baja
+}
+
 # Clases de manos de póker (para asignar un "tipo" y un valor de desempate)
 # Asignar un valor numérico a cada tipo de mano para poder compararlas
 HAND_RANKS = {
@@ -272,6 +279,19 @@ def evaluate_hand(hand):
     # 9. Carta Alta (High Card)
     return "Carta Alta", tuple(sorted_ranks) # Usar todas las cartas para desempate
 
+# --- Función para formatear los valores de desempate a su representación de carta ---
+def format_tie_breaker_for_display(tie_breaker_tuple):
+    """
+    Convierte una tupla de valores numéricos de desempate en sus equivalentes de carta.
+    """
+    formatted_values = []
+    for val in tie_breaker_tuple:
+        if isinstance(val, int):
+            formatted_values.append(VALUE_RANKS.get(val, str(val))) # Usa VALUE_RANKS o el valor numérico si no está mapeado
+        else: # Si ya es una cadena (ej. un 'A' si viene del sorted_ranks_for_tiebreaker)
+            formatted_values.append(str(val))
+    return tuple(formatted_values)
+
 # --- Función de Comparación de Manos ---
 
 def compare_hands(hand1, hand2):
@@ -285,9 +305,13 @@ def compare_hands(hand1, hand2):
     rank1 = HAND_RANKS[type1]
     rank2 = HAND_RANKS[type2]
 
+    # Formatear los valores de desempate para la impresión
+    formatted_tb1 = format_tie_breaker_for_display(tie_breaker1)
+    formatted_tb2 = format_tie_breaker_for_display(tie_breaker2)
+
     # Impresión de manos para depuración/información al usuario
-    print(f"Tu mano: {type1} {tuple(tb1 for tb1 in tie_breaker1 if isinstance(tb1, int) or isinstance(tb1, tuple))}")
-    print(f"Mano de la Computadora: {type2} {tuple(tb2 for tb2 in tie_breaker2 if isinstance(tb2, int) or isinstance(tb2, tuple))}")
+    print(f"Tu mano: {type1} {formatted_tb1}")
+    print(f"Mano de la Computadora: {type2} {formatted_tb2}")
 
 
     # Paso 1: Comparar el tipo de mano
@@ -388,20 +412,18 @@ def main():
     print("Tu mano final es:")
     player.display_hand(hide_all=False) # Asegúrar que la mano del jugador sea visible
 
-    print("\nLa mano de la Computadora (oculta) es:")
-    computer.display_hand(hide_all=True) # La mano de la computadora sigue oculta
+    # La mano del oponente SIEMPRE se muestra al efectuar la comparación
+    print("\nLa mano de la Computadora es:")
+    computer.display_hand(hide_all=False) # Ahora siempre se revela aquí
     
     winner = compare_hands(player.hand, computer.hand)
 
     if winner == 1:
         print("\n🏆 ¡Felicidades! ¡Tu mano es la ganadora! 🏆")
     elif winner == 2:
-        print("\n🤖 ¡La Computadora gana! Aquí está su mano:")
-        computer.display_hand(hide_all=False) # Revelar la mano de la computadora si gana
+        print("\n🤖 ¡La Computadora gana!")
     else:
         print("\n🤝 ¡Es un empate! Nadie gana esta ronda.")
-        print("La mano de la Computadora fue:")
-        computer.display_hand(hide_all=False) # Revelar la mano de la computadora en caso de empate
         
     print("\n--- Fin del Juego ---")
 
