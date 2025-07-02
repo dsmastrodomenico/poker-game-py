@@ -1,7 +1,7 @@
 # main.py
 
 import random
-from card import Card # Necesario si necesitas instanciar Card directamente en main (aunque no se hace aquí)
+from card import Card
 from deck import Deck
 from player import Player
 from hand_evaluator import evaluate_hand, compare_hands, RANK_VALUES # Importa las funciones y constantes necesarias
@@ -9,85 +9,93 @@ from hand_evaluator import evaluate_hand, compare_hands, RANK_VALUES # Importa l
 def main():
     print("¡Bienvenido al juego de Póker en Consola!")
 
-    # 1. Crear y Barajar el Mazo
     deck = Deck()
     deck.shuffle()
 
-    # 2. Crear Jugadores
     player = Player("Tú")
     computer = Player("Computadora")
 
-    # 3. Repartir 5 cartas a cada uno
     print("\nRepartiendo cartas iniciales...")
     player.add_cards(deck.deal(5))
-    computer.add_cards(deck.deal(5)) # Las cartas de la computadora se almacenan pero no se muestran
+    computer.add_cards(deck.deal(5))
 
-    # 4. Mostrar la mano del Jugador
     player.display_hand()
-
-    # 5. Mostrar la mano de la Computadora (oculta)
-    computer.display_hand(hide_all=True) # Sigue oculta
+    computer.display_hand(hide_all=True)
     print(f"\nLa computadora tiene {len(computer.hand)} cartas en su mano (ocultas).")
 
     print(f"\nCartas restantes en el mazo: {len(deck)}")
 
-    # --- Simulación de un cambio de cartas (sin cursor interactivo por ahora) ---
+    # --- Fase de cambio de cartas del Jugador ---
     print("\n--- Fase de cambio de cartas ---")
     print("¿Qué cartas deseas cambiar? Ingresa los números separados por espacios (ej. 1 3 5).")
     print("Ingresa 0 si no deseas cambiar ninguna carta.")
 
+    player_cards_to_change_indices = []
     while True:
         try:
             choice = input("Tu elección: ").strip()
             if choice == '0':
-                cards_to_change_indices = []
+                player_cards_to_change_indices = []
                 break
             
-            cards_to_change_indices = [int(x) - 1 for x in choice.split()]
+            player_cards_to_change_indices = [int(x) - 1 for x in choice.split()]
             
-            # Validar que los índices sean válidos y únicos
-            if not all(0 <= idx < len(player.hand) for idx in cards_to_change_indices):
+            if not all(0 <= idx < len(player.hand) for idx in player_cards_to_change_indices):
                 print("Error: Ingresa números de carta válidos (1-5).")
                 continue
-            if len(set(cards_to_change_indices)) != len(cards_to_change_indices):
+            if len(set(player_cards_to_change_indices)) != len(player_cards_to_change_indices):
                 print("Error: No puedes seleccionar la misma carta varias veces.")
                 continue
             break
         except ValueError:
             print("Entrada inválida. Por favor, ingresa números separados por espacios.")
 
-    if cards_to_change_indices:
-        print(f"Cambiando {len(cards_to_change_indices)} carta(s)...")
-        # Remover las cartas seleccionadas y añadir nuevas
-        # Se crea una nueva lista de la mano para no modificarla mientras se itera
+    if player_cards_to_change_indices:
+        print(f"Cambiando {len(player_cards_to_change_indices)} carta(s) para ti...")
         current_hand_copy = list(player.hand) 
-        player.hand = [] # Vacía la mano actual del jugador
+        player.hand = [] 
 
-        removed_cards = [] # En un juego real, estas irían a la pila de descarte
         for i, card in enumerate(current_hand_copy):
-            if i in cards_to_change_indices:
-                removed_cards.append(card)
-            else:
-                player.hand.append(card) # Conserva las cartas no seleccionadas
+            if i not in player_cards_to_change_indices:
+                player.hand.append(card)
 
-        # Repartir nuevas cartas
         try:
-            player.add_cards(deck.deal(len(cards_to_change_indices)))
-            print("Cartas cambiadas exitosamente.")
+            player.add_cards(deck.deal(len(player_cards_to_change_indices)))
+            print("Tus cartas fueron cambiadas exitosamente.")
         except ValueError as e:
-            print(f"Error al cambiar cartas: {e}. No hay suficientes cartas en el mazo.")
+            print(f"Error al cambiar tus cartas: {e}. No hay suficientes cartas en el mazo.")
 
     player.display_hand()
     print(f"Cartas restantes en el mazo: {len(deck)}")
 
+    # --- Fase de cambio de cartas de la Computadora ---
+    print("\n--- Turno de la Computadora para cambiar cartas ---")
+    computer_cards_to_change_indices = computer.decide_cards_to_discard() # La IA toma su decisión
+
+    if computer_cards_to_change_indices:
+        print(f"La computadora ha decidido cambiar {len(computer_cards_to_change_indices)} carta(s).")
+        current_hand_copy = list(computer.hand)
+        computer.hand = []
+
+        for i, card in enumerate(current_hand_copy):
+            if i not in computer_cards_to_change_indices:
+                computer.hand.append(card)
+        
+        try:
+            computer.add_cards(deck.deal(len(computer_cards_to_change_indices)))
+        except ValueError as e:
+            print(f"Error al cambiar las cartas de la computadora: {e}. No hay suficientes cartas en el mazo.")
+    else:
+        print("La computadora no ha cambiado ninguna carta.")
+
+
     # --- EVALUACIÓN Y COMPARACIÓN DE MANOS FINALES ---
     print("\n--- Evaluando Manos Finales ---")
     print("Tu mano final es:")
-    player.display_hand(hide_all=False) # Asegúrate de que la mano del jugador sea visible
+    player.display_hand(hide_all=False)
 
-    # La mano del oponente SIEMPRE se muestra al efectuar la comparación
     print("\nLa mano de la Computadora es:")
-    computer.display_hand(hide_all=False) # Ahora siempre se revela aquí
+    computer.display_hand(hide_all=False) # Se revela la mano de la computadora
     
     winner = compare_hands(player.hand, computer.hand)
 
