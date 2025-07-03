@@ -13,7 +13,7 @@ class Player:
         """Añade cartas a la mano del jugador."""
         self.hand.extend(cards)
 
-    # display_hand ahora acepta 'selected_index' y 'marked_for_discard' ---
+    # --- display_hand ahora acepta 'selected_index' y 'marked_for_discard' ---
     def display_hand(self, hide_all=False, selected_index=-1, marked_for_discard=None):
         """
         Muestra las cartas en la mano del jugador.
@@ -36,15 +36,21 @@ class Player:
             # --- Personalizar la visualización de la carta ---
             # Si la carta está marcada para descarte, añadir un indicador
             if not hide_all and i in marked_for_discard:
-                card_display_lines[0] = card_display_lines[0].replace('┌', '╔').replace('─', '═').replace('┐', '╗')
-                card_display_lines[4] = card_display_lines[4].replace('└', '╚').replace('─', '═').replace('┘', '╝')
-                card_display_lines[2] = card_display_lines[2][:3] + " [X] " + card_display_lines[2][7:] # Marca central
+                # Se modifica la línea central para incluir '[X]' manteniendo el ancho
+                # Se asume que la carta tiene un ancho de 9 caracteres (┌───────┐)
+                # '│   ♥   │' tiene un len de 9
+                # '[X]' tiene un len de 3. Lo centramos y mantenemos los espacios laterales.
+                # Se asegura que los bordes también tengan 9 caracteres de ancho
+                card_display_lines[0] = "╔═══════╗" # Borde superior doble
+                card_display_lines[2] = "║   [X] ║" # Marcador central
+                card_display_lines[4] = "╚═══════╝" # Borde inferior doble
                 
             # Si esta es la carta seleccionada por el cursor
             if not hide_all and i == selected_index:
-                # Cambiar los bordes para resaltar el cursor
-                card_display_lines[0] = card_display_lines[0].replace('┌', '►').replace('┐', '◄')
-                card_display_lines[4] = card_display_lines[4].replace('└', '►').replace('┘', '◄')
+                # Cambiar los bordes para resaltar el cursor, manteniendo el ancho
+                # Usamos los caracteres de cursor y rellenamos el resto con espacios o los caracteres originales
+                card_display_lines[0] = card_display_lines[0].replace('┌', '►').replace('╔', '►').replace('┐', '◄').replace('╗', '◄')
+                card_display_lines[4] = card_display_lines[4].replace('└', '►').replace('╚', '►').replace('┘', '◄').replace('╝', '◄')
 
             card_lines_list.append(card_display_lines)
 
