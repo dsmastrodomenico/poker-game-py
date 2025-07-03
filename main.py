@@ -31,7 +31,7 @@ def main():
     while True:
         clear_console() # Limpia la consola antes de cada redibujado
         print("--- Fase de cambio de cartas ---")
-        print("\nComandos: 'a' (izquierda), 'd' (derecha), 'espacio' (seleccionar/deseleccionar), 'enter' (confirmar).")
+        print("\nComandos: 'a' (izquierda), 'd' (derecha), 'x' (seleccionar/deseleccionar), 'enter' (confirmar).")
         print("\nTu mano actual:")
         player.display_hand(selected_index=current_selected_card_index, marked_for_discard=cards_to_discard)
         print(f"Cartas seleccionadas para descarte: {[idx + 1 for idx in sorted(list(cards_to_discard))]}")
@@ -42,7 +42,7 @@ def main():
             current_selected_card_index = (current_selected_card_index - 1 + len(player.hand)) % len(player.hand)
         elif command == 'd': # Mover a la derecha
             current_selected_card_index = (current_selected_card_index + 1) % len(player.hand)
-        elif command == ' ': # Seleccionar/Deseleccionar
+        elif command == 'x': # Seleccionar/Deseleccionar
             if current_selected_card_index in cards_to_discard:
                 cards_to_discard.remove(current_selected_card_index)
             else:
@@ -50,7 +50,7 @@ def main():
         elif command == '': # Enter para confirmar
             break # Sale del bucle de selección
         else:
-            print("Comando inválido. Usa 'a', 'd', 'espacio' o 'enter'.")
+            print("Comando inválido. Usa 'a', 'd', 'x' o 'enter'.")
             input("Presiona Enter para continuar...") # Pausa para ver el mensaje de error
 
     # Una vez fuera del bucle, procesar los cambios
