@@ -1,7 +1,6 @@
 # player.py
 
-from card import Card
-from hand_evaluator import evaluate_hand, RANK_VALUES 
+from hand_evaluator import evaluate_hand, RANK_VALUES # Se mantiene si evaluate_hand es usado internamente por Player, sino se remueve
 
 class Player:
     """Representa a un jugador (humano o computadora)."""
@@ -30,42 +29,37 @@ class Player:
 
         card_lines_list = [] # Lista de listas de líneas ASCII para cada carta
         for i, card in enumerate(self.hand):
+            # Aquí 'card' es una instancia de Card que ya existe en self.hand,
+            # no se necesita importar la clase Card para usar su método.
             card_display_lines = card.display_ascii(hidden=hide_all)
             
             # --- Personalizar la visualización de la carta ---
             # Si la carta está marcada para descarte, añadir un indicador
             if not hide_all and i in marked_for_discard:
-                # Se modifica la línea central para incluir '[X]' manteniendo el ancho
-                # Se considera que la carta tiene un ancho de 9 caracteres (┌───────┐)
-                # '│   ♥   │' tiene un len de 9
-                # '[X]' tiene un len de 3. Lo centramos y mantenemos los espacios laterales.
-                # Se establece que los bordes también tengan 9 caracteres de ancho
-                card_display_lines[0] = "╔═══════╗" # Borde superior doble
-                card_display_lines[2] = "║   [X] ║" # Marcador central
-                card_display_lines[4] = "╚═══════╝" # Borde inferior doble
+                card_display_lines[0] = "╔═══════╗"
+                card_display_lines[2] = "║   [X] ║"
+                card_display_lines[4] = "╚═══════╝"
                 
             # Si esta es la carta seleccionada por el cursor
             if not hide_all and i == selected_index:
-                # Cambiar los bordes para resaltar el cursor, manteniendo el ancho
-                # Usamos los caracteres de cursor y rellenamos el resto con espacios o los caracteres originales
                 card_display_lines[0] = card_display_lines[0].replace('┌', '►').replace('╔', '►').replace('┐', '◄').replace('╗', '◄')
                 card_display_lines[4] = card_display_lines[4].replace('└', '►').replace('╚', '►').replace('┘', '◄').replace('╝', '◄')
 
             card_lines_list.append(card_display_lines)
 
         # Imprimir las cartas una al lado de la otra
-        if card_lines_list: # Asegúrate de que haya cartas para imprimir
-            for i in range(len(card_lines_list[0])): # Itera sobre las líneas de una carta (asumiendo que todas tienen 5 líneas)
+        if card_lines_list:
+            for i in range(len(card_lines_list[0])):
                 line_to_print = ""
                 for j, card_display in enumerate(card_lines_list):
-                    line_to_print += card_display[i] + "  " # Agrega un espacio entre cartas
+                    line_to_print += card_display[i] + "  "
                 print(line_to_print)
         
         # Mostrar los números de las cartas para selección
         if not hide_all:
             indices_line = ""
             for i in range(len(self.hand)):
-                indices_line += f"    ({i+1})    " # Alinea los números con las cartas
+                indices_line += f"    ({i+1})    "
             print(indices_line)
     
     def decide_cards_to_discard(self):
@@ -112,7 +106,6 @@ class Player:
             print(f"{self.name} descarta 3 cartas para mantener su Par.")
 
         else: # Carta Alta
-            # Se sigue utilizando la comprensión de lista para obtener los rangos numéricos y sus índices
             sorted_by_rank_asc = sorted([(RANK_VALUES[card.rank], i) for i, card in enumerate(self.hand)])
             
             for i in range(3): 
