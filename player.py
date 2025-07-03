@@ -1,7 +1,7 @@
 # player.py
 
 from card import Card
-from hand_evaluator import evaluate_hand, RANK_VALUES # Se mantiene si evaluate_hand es usado internamente por Player, sino se remueve
+from hand_evaluator import evaluate_hand, RANK_VALUES 
 
 class Player:
     """Representa a un jugador (humano o computadora)."""
@@ -13,7 +13,6 @@ class Player:
         """Añade cartas a la mano del jugador."""
         self.hand.extend(cards)
 
-    # --- display_hand ahora acepta 'selected_index' y 'marked_for_discard' ---
     def display_hand(self, hide_all=False, selected_index=-1, marked_for_discard=None):
         """
         Muestra las cartas en la mano del jugador.
@@ -36,11 +35,11 @@ class Player:
             # --- Personalizar la visualización de la carta ---
             # Si la carta está marcada para descarte, añadir un indicador
             if not hide_all and i in marked_for_discard:
-                # Se modifica la línea central para incluir '[X]' manteniendo el ancho
-                # Se asume que la carta tiene un ancho de 9 caracteres (┌───────┐)
+                # Modificamos la línea central para incluir '[X]' manteniendo el ancho
+                # Asumimos que la carta tiene un ancho de 9 caracteres (┌───────┐)
                 # '│   ♥   │' tiene un len de 9
                 # '[X]' tiene un len de 3. Lo centramos y mantenemos los espacios laterales.
-                # Se asegura que los bordes también tengan 9 caracteres de ancho
+                # Aseguramos que los bordes también tengan 9 caracteres de ancho
                 card_display_lines[0] = "╔═══════╗" # Borde superior doble
                 card_display_lines[2] = "║   [X] ║" # Marcador central
                 card_display_lines[4] = "╚═══════╝" # Borde inferior doble
@@ -83,8 +82,7 @@ class Player:
         cards_to_discard_indices = []
         
         hand_ranks_numeric = [RANK_VALUES[card.rank] for card in self.hand]
-        indexed_hand_ranks = sorted([(rank, i) for i, rank in enumerate(hand_ranks_numeric)], key=lambda x: x[0], reverse=True)
-
+        # indexed_hand_ranks = sorted([(rank, i) for i, rank in enumerate(hand_ranks_numeric)], key=lambda x: x[0], reverse=True)
 
         if hand_type in ["Escalera Real", "Escalera de Color", "Póker", "Full House", "Escalera", "Color"]:
             print(f"{self.name} no descarta ninguna carta (tiene un/una {hand_type}).")
@@ -117,6 +115,8 @@ class Player:
             print(f"{self.name} descarta 3 cartas para mantener su Par.")
 
         else: # Carta Alta
+            # Aún se necesitan ordenar las cartas por rango para descartar las más bajas.
+            # Aquí se usa directamente 'sorted_by_rank_asc' sin la variable intermedia indexed_hand_ranks.
             sorted_by_rank_asc = sorted([(RANK_VALUES[card.rank], i) for i, card in enumerate(self.hand)])
             
             for i in range(3): 
