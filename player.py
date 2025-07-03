@@ -1,8 +1,7 @@
 # player.py
 
-from card import Card # Importa la clase Card para poder usar sus métodos de display
-# Importa evaluate_hand y RANK_VALUES de hand_evaluator para que el jugador pueda 'pensar'
-from hand_evaluator import evaluate_hand, RANK_VALUES
+from card import Card
+from hand_evaluator import evaluate_hand, RANK_VALUES # Se mantiene si evaluate_hand es usado internamente por Player, sino se remueve
 
 class Player:
     """Representa a un jugador (humano o computadora)."""
@@ -14,38 +13,54 @@ class Player:
         """Añade cartas a la mano del jugador."""
         self.hand.extend(cards)
 
-    def display_hand(self, hide_all=False):
+    # display_hand ahora acepta 'selected_index' y 'marked_for_discard' ---
+    def display_hand(self, hide_all=False, selected_index=-1, marked_for_discard=None):
         """
         Muestra las cartas en la mano del jugador.
         Si hide_all es True, oculta todas las cartas (para la computadora).
+        selected_index: Índice de la carta sobre la que está el cursor (-1 si no hay cursor).
+        marked_for_discard: Lista/Set de índices de cartas marcadas para descarte.
         """
+        if marked_for_discard is None:
+            marked_for_discard = set() # Inicializa como un set vacío si no se proporciona
+
         print(f"\n--- Mano de {self.name} ---")
         if not self.hand:
             print("Mano vacía.")
             return
 
-        # Obtener las representaciones ASCII de cada carta
-        card_lines = []
+        card_lines_list = [] # Lista de listas de líneas ASCII para cada carta
         for i, card in enumerate(self.hand):
-            if hide_all:
-                card_lines.append(card.display_ascii(hidden=True))
-            else:
-                card_lines.append(card.display_ascii())
+            card_display_lines = card.display_ascii(hidden=hide_all)
+            
+            # --- Personalizar la visualización de la carta ---
+            # Si la carta está marcada para descarte, añadir un indicador
+            if not hide_all and i in marked_for_discard:
+                card_display_lines[0] = card_display_lines[0].replace('┌', '╔').replace('─', '═').replace('┐', '╗')
+                card_display_lines[4] = card_display_lines[4].replace('└', '╚').replace('─', '═').replace('┘', '╝')
+                card_display_lines[2] = card_display_lines[2][:3] + " [X] " + card_display_lines[2][7:] # Marca central
+                
+            # Si esta es la carta seleccionada por el cursor
+            if not hide_all and i == selected_index:
+                # Cambiar los bordes para resaltar el cursor
+                card_display_lines[0] = card_display_lines[0].replace('┌', '►').replace('┐', '◄')
+                card_display_lines[4] = card_display_lines[4].replace('└', '►').replace('┘', '◄')
+
+            card_lines_list.append(card_display_lines)
 
         # Imprimir las cartas una al lado de la otra
-        # Asumiendo que todas las cartas tienen el mismo número de líneas (5)
-        for i in range(5): 
-            line_to_print = ""
-            for j, card_display in enumerate(card_lines):
-                line_to_print += card_display[i] + "  " # Agrega un espacio entre cartas
-            print(line_to_print)
+        if card_lines_list: # Asegúrate de que haya cartas para imprimir
+            for i in range(len(card_lines_list[0])): # Itera sobre las líneas de una carta (asumiendo que todas tienen 5 líneas)
+                line_to_print = ""
+                for j, card_display in enumerate(card_lines_list):
+                    line_to_print += card_display[i] + "  " # Agrega un espacio entre cartas
+                print(line_to_print)
         
-        # Opcional: Mostrar los números de las cartas para selección
+        # Mostrar los números de las cartas para selección
         if not hide_all:
             indices_line = ""
             for i in range(len(self.hand)):
-                # Ajusta el espaciado para que los números coincidan con las cartas
-                indices_line += f"    ({i+1})    " 
+                indices_line += f"    ({i+1})    " # Alinea los números con las cartas
             print(indices_line)
     
     def decide_cards_to_discard(self):
@@ -57,25 +72,20 @@ class Player:
         if not self.hand:
             return []
 
-        # Evaluar la mano actual de la computadora
         hand_type, tie_breaker_values = evaluate_hand(self.hand)
         
         cards_to_discard_indices = []
         
-        # Obtener los valores numéricos de las cartas en la mano para facilitar la manipulación
         hand_ranks_numeric = [RANK_VALUES[card.rank] for card in self.hand]
-        # Crear una lista de tuplas (valor_numerico, indice_original) para mantener el rastro de los índices
         indexed_hand_ranks = sorted([(rank, i) for i, rank in enumerate(hand_ranks_numeric)], key=lambda x: x[0], reverse=True)
 
 
         if hand_type in ["Escalera Real", "Escalera de Color", "Póker", "Full House", "Escalera", "Color"]:
-            # Manos muy fuertes, no se descarta ninguna carta
             print(f"{self.name} no descarta ninguna carta (tiene un/una {hand_type}).")
             return []
         
         elif hand_type == "Trío":
-            # Mantener el trío, descartar las 2 cartas restantes (kickers)
-            three_of_a_kind_rank = tie_breaker_values[0] # El primer valor en el tie_breaker del Trío es el valor del trío
+            three_of_a_kind_rank = tie_breaker_values[0]
             
             for i, card in enumerate(self.hand):
                 if RANK_VALUES[card.rank] != three_of_a_kind_rank:
@@ -83,7 +93,6 @@ class Player:
             print(f"{self.name} descarta 2 cartas para mantener su Trío.")
             
         elif hand_type == "Dos Pares":
-            # Mantener los dos pares, descartar la 1 carta restante (kicker)
             pair1_rank = tie_breaker_values[0]
             pair2_rank = tie_breaker_values[1]
             
@@ -94,21 +103,16 @@ class Player:
             print(f"{self.name} descarta 1 carta para mantener sus Dos Pares.")
 
         elif hand_type == "Par":
-            # Mantener el par, descartar las 3 cartas restantes (kickers)
-            pair_rank = tie_breaker_values[0] # El primer valor en el tie_breaker del Par es el valor del par
+            pair_rank = tie_breaker_values[0]
             
             for i, card in enumerate(self.hand):
                 if RANK_VALUES[card.rank] != pair_rank:
                     cards_to_discard_indices.append(i)
             print(f"{self.name} descarta 3 cartas para mantener su Par.")
 
-        else: # Carta Alta (la mano más débil)
-            # Descartar las 3 cartas más bajas para intentar formar algo
-            # Ordenar por valor numérico ascendente para seleccionar las más bajas
-            # No necesitamos las originales, solo sus índices
+        else: # Carta Alta
             sorted_by_rank_asc = sorted([(RANK_VALUES[card.rank], i) for i, card in enumerate(self.hand)])
             
-            # Descartar las 3 cartas con los valores más bajos
             for i in range(3): 
                 cards_to_discard_indices.append(sorted_by_rank_asc[i][1])
             print(f"{self.name} descarta 3 cartas para intentar mejorar su mano.")
