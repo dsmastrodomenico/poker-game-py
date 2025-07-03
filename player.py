@@ -35,11 +35,11 @@ class Player:
             # --- Personalizar la visualización de la carta ---
             # Si la carta está marcada para descarte, añadir un indicador
             if not hide_all and i in marked_for_discard:
-                # Modificamos la línea central para incluir '[X]' manteniendo el ancho
-                # Asumimos que la carta tiene un ancho de 9 caracteres (┌───────┐)
+                # Se modifica la línea central para incluir '[X]' manteniendo el ancho
+                # Se considera que la carta tiene un ancho de 9 caracteres (┌───────┐)
                 # '│   ♥   │' tiene un len de 9
                 # '[X]' tiene un len de 3. Lo centramos y mantenemos los espacios laterales.
-                # Aseguramos que los bordes también tengan 9 caracteres de ancho
+                # Se establece que los bordes también tengan 9 caracteres de ancho
                 card_display_lines[0] = "╔═══════╗" # Borde superior doble
                 card_display_lines[2] = "║   [X] ║" # Marcador central
                 card_display_lines[4] = "╚═══════╝" # Borde inferior doble
@@ -81,9 +81,6 @@ class Player:
         
         cards_to_discard_indices = []
         
-        hand_ranks_numeric = [RANK_VALUES[card.rank] for card in self.hand]
-        # indexed_hand_ranks = sorted([(rank, i) for i, rank in enumerate(hand_ranks_numeric)], key=lambda x: x[0], reverse=True)
-
         if hand_type in ["Escalera Real", "Escalera de Color", "Póker", "Full House", "Escalera", "Color"]:
             print(f"{self.name} no descarta ninguna carta (tiene un/una {hand_type}).")
             return []
@@ -115,8 +112,7 @@ class Player:
             print(f"{self.name} descarta 3 cartas para mantener su Par.")
 
         else: # Carta Alta
-            # Aún se necesitan ordenar las cartas por rango para descartar las más bajas.
-            # Aquí se usa directamente 'sorted_by_rank_asc' sin la variable intermedia indexed_hand_ranks.
+            # Se sigue utilizando la comprensión de lista para obtener los rangos numéricos y sus índices
             sorted_by_rank_asc = sorted([(RANK_VALUES[card.rank], i) for i, card in enumerate(self.hand)])
             
             for i in range(3): 
