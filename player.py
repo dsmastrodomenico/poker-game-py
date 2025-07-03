@@ -1,6 +1,5 @@
 # player.py
 
-from card import Card
 from hand_evaluator import evaluate_hand, RANK_VALUES # Se mantiene si evaluate_hand es usado internamente por Player, sino se remueve
 
 class Player:
@@ -13,7 +12,6 @@ class Player:
         """Añade cartas a la mano del jugador."""
         self.hand.extend(cards)
 
-    # --- display_hand ahora acepta 'selected_index' y 'marked_for_discard' ---
     def display_hand(self, hide_all=False, selected_index=-1, marked_for_discard=None):
         """
         Muestra las cartas en la mano del jugador.
@@ -31,42 +29,37 @@ class Player:
 
         card_lines_list = [] # Lista de listas de líneas ASCII para cada carta
         for i, card in enumerate(self.hand):
+            # Aquí 'card' es una instancia de Card que ya existe en self.hand,
+            # no se necesita importar la clase Card para usar su método.
             card_display_lines = card.display_ascii(hidden=hide_all)
             
             # --- Personalizar la visualización de la carta ---
             # Si la carta está marcada para descarte, añadir un indicador
             if not hide_all and i in marked_for_discard:
-                # Se modifica la línea central para incluir '[X]' manteniendo el ancho
-                # Se asume que la carta tiene un ancho de 9 caracteres (┌───────┐)
-                # '│   ♥   │' tiene un len de 9
-                # '[X]' tiene un len de 3. Lo centramos y mantenemos los espacios laterales.
-                # Se asegura que los bordes también tengan 9 caracteres de ancho
-                card_display_lines[0] = "╔═══════╗" # Borde superior doble
-                card_display_lines[2] = "║   [X] ║" # Marcador central
-                card_display_lines[4] = "╚═══════╝" # Borde inferior doble
+                card_display_lines[0] = "╔═══════╗"
+                card_display_lines[2] = "║   [X] ║"
+                card_display_lines[4] = "╚═══════╝"
                 
             # Si esta es la carta seleccionada por el cursor
             if not hide_all and i == selected_index:
-                # Cambiar los bordes para resaltar el cursor, manteniendo el ancho
-                # Usamos los caracteres de cursor y rellenamos el resto con espacios o los caracteres originales
                 card_display_lines[0] = card_display_lines[0].replace('┌', '►').replace('╔', '►').replace('┐', '◄').replace('╗', '◄')
                 card_display_lines[4] = card_display_lines[4].replace('└', '►').replace('╚', '►').replace('┘', '◄').replace('╝', '◄')
 
             card_lines_list.append(card_display_lines)
 
         # Imprimir las cartas una al lado de la otra
-        if card_lines_list: # Asegúrate de que haya cartas para imprimir
-            for i in range(len(card_lines_list[0])): # Itera sobre las líneas de una carta (asumiendo que todas tienen 5 líneas)
+        if card_lines_list:
+            for i in range(len(card_lines_list[0])):
                 line_to_print = ""
                 for j, card_display in enumerate(card_lines_list):
-                    line_to_print += card_display[i] + "  " # Agrega un espacio entre cartas
+                    line_to_print += card_display[i] + "  "
                 print(line_to_print)
         
         # Mostrar los números de las cartas para selección
         if not hide_all:
             indices_line = ""
             for i in range(len(self.hand)):
-                indices_line += f"    ({i+1})    " # Alinea los números con las cartas
+                indices_line += f"    ({i+1})    "
             print(indices_line)
     
     def decide_cards_to_discard(self):
@@ -82,10 +75,6 @@ class Player:
         
         cards_to_discard_indices = []
         
-        hand_ranks_numeric = [RANK_VALUES[card.rank] for card in self.hand]
-        indexed_hand_ranks = sorted([(rank, i) for i, rank in enumerate(hand_ranks_numeric)], key=lambda x: x[0], reverse=True)
-
-
         if hand_type in ["Escalera Real", "Escalera de Color", "Póker", "Full House", "Escalera", "Color"]:
             print(f"{self.name} no descarta ninguna carta (tiene un/una {hand_type}).")
             return []
