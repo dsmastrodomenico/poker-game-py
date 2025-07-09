@@ -24,8 +24,8 @@ def _play_round(deck, player, computer):
     # Mostrar la mano del Jugador
     player.display_hand()
 
-    # Mostrar la mano de la Computadora (oculta)
-    computer.display_hand(hide_all=True)
+    print("\nLa mano de la Computadora (oculta) es:")
+    computer.display_hand(hide_all=True) # Se muestra boca abajo
     print(f"\nLa computadora tiene {len(computer.hand)} cartas en su mano (ocultas).")
 
     print(f"\nCartas restantes en el mazo: {len(deck)}")
@@ -40,7 +40,7 @@ def _play_round(deck, player, computer):
         clear_console()
         print("--- Fase de cambio de cartas ---")
         print("\nComandos: 'a' (izquierda), 'd' (derecha), 'x' (seleccionar/deseleccionar), 'enter' (confirmar).")
-        print("\nTu mano actual:") 
+        print("\nTu mano actual:")
         player.display_hand(selected_index=current_selected_card_index, marked_for_discard=cards_to_discard)
         print(f"Cartas seleccionadas para descarte: {[idx + 1 for idx in sorted(list(cards_to_discard))]}")
         
@@ -64,7 +64,7 @@ def _play_round(deck, player, computer):
     player_cards_to_change_indices = sorted(list(cards_to_discard))
 
     if player_cards_to_change_indices:
-        print(f"\nCambiando {len(player_cards_to_change_indices)} carta(s) para el jugador...") 
+        print(f"\nCambiando {len(player_cards_to_change_indices)} carta(s) para el jugador...")
         current_hand_copy = list(player.hand) 
         player.hand = [] 
 
@@ -76,9 +76,9 @@ def _play_round(deck, player, computer):
             player.add_cards(deck.deal(len(player_cards_to_change_indices)))
             print("Las cartas del jugador fueron cambiadas exitosamente.")
         except ValueError as e:
-            print(f"Error al cambiar las cartas del jugador: {e}. No hay suficientes cartas en el mazo.") 
+            print(f"Error al cambiar las cartas del jugador: {e}. No hay suficientes cartas en el mazo.")
     else:
-        print("\nEl jugador no ha cambiado ninguna carta.") 
+        print("\nEl jugador no ha cambiado ninguna carta.")
 
     player.display_hand()
     print(f"Cartas restantes en el mazo: {len(deck)}")
@@ -106,7 +106,7 @@ def _play_round(deck, player, computer):
 
     # --- EVALUACIÓN Y COMPARACIÓN DE MANOS FINALES ---
     print("\n--- Evaluando Manos Finales ---")
-    print("La mano final del Jugador es:") 
+    print("La mano final del Jugador es:")
     player.display_hand(hide_all=False)
 
     print("\nLa mano de la Computadora es:")
@@ -115,9 +115,9 @@ def _play_round(deck, player, computer):
     winner = compare_hands(player.hand, computer.hand)
 
     if winner == 1:
-        print("\n🏆 ¡Felicidades! ¡El Jugador gana la ronda! 🏆") 
+        print("\n🏆 ¡Felicidades! ¡El Jugador gana la ronda! 🏆")
     elif winner == 2:
-        print("\n🤖 ¡La Computadora gana la ronda!") 
+        print("\n🤖 ¡La Computadora gana la ronda!")
     else:
         print("\n🤝 ¡Es un empate! Nadie gana esta ronda.")
             
