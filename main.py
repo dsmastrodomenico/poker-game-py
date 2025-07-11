@@ -125,7 +125,6 @@ def _play_round_poker(deck, player, computer):
         print("\n🤝 ¡Es un empate! Nadie gana esta ronda de Póker.")
         return False # La computadora ganó o hubo empate
             
-
 def _play_quick_game(deck, player, computer):
     """
     Mecánica de juego rápido de "carta más alta".
@@ -135,8 +134,13 @@ def _play_quick_game(deck, player, computer):
     print("\n--- Iniciando Juego Rápido: ¡Carta Más Alta! ---")
     
     while True:
+        clear_console() # Limpiar la consola al inicio de cada turno rápido
+        print("\n--- Juego Rápido: ¡Carta Más Alta! ---")
+        print(f"Cartas restantes en el mazo: {len(deck)}")
+
         if len(deck) < 2: # Necesitamos al menos 2 cartas para que cada uno saque una
             print("\n¡El mazo se ha agotado para el juego rápido! Volviendo al Póker regular.")
+            input("Presiona Enter para continuar...") # Pausa para que el usuario lea
             return True # Indica que el mazo se agotó
 
         input("\nPresiona Enter para sacar una carta...")
@@ -145,36 +149,43 @@ def _play_quick_game(deck, player, computer):
         player_card = deck.deal(1)[0]
         computer_card = deck.deal(1)[0]
 
-        print(f"\nJugador sacó: {player_card.rank} de {player_card.suit}")
-        print(f"Computadora sacó: {computer_card.rank} de {computer_card.suit}")
+        # Mostrar las cartas sacadas usando display_hand de Player
+        # Para esto, necesitamos que Player pueda "mostrar" una sola carta o una lista de cartas
+        # temporalmente. La forma más sencilla es crear una mano temporal para cada uno.
+
+        # Mano temporal para el Jugador
+        temp_player = Player("Jugador")
+        temp_player.add_cards([player_card])
+        print("\nTu carta:")
+        temp_player.display_hand()
+
+        # Mano temporal para la Computadora
+        temp_computer = Player("Computadora")
+        temp_computer.add_cards([computer_card])
+        print("\nLa carta de la Computadora:")
+        temp_computer.display_hand()
 
         player_rank_val = RANK_VALUES[player_card.rank]
         computer_rank_val = RANK_VALUES[computer_card.rank]
 
-        # Ajuste para el As en la comparación de "carta más alta" (si es relevante, normalmente As es el más alto)
-        # Aquí, el As es 14, así que no necesita ajuste especial a menos que se quiera que el 2 gane al As en algún contexto.
-        # En "carta más alta", el As es generalmente la carta más alta.
-
         if player_rank_val > computer_rank_val:
-            print(f"¡El Jugador gana esta ronda rápida con un {VALUE_RANKS.get(player_rank_val, str(player_rank_val))}!")
+            print(f"\n¡El Jugador gana esta ronda rápida con un {VALUE_RANKS.get(player_rank_val, str(player_rank_val))}!")
         elif computer_rank_val > player_rank_val:
-            print(f"¡La Computadora gana esta ronda rápida con un {VALUE_RANKS.get(computer_rank_val, str(computer_rank_val))}!")
+            print(f"\n¡La Computadora gana esta ronda rápida con un {VALUE_RANKS.get(computer_rank_val, str(computer_rank_val))}!")
         else:
-            print("¡Empate en esta ronda rápida! Ambos sacaron la misma carta.")
+            print("\n¡Empate en esta ronda rápida! Ambos sacaron la misma carta.")
         
-        print(f"Cartas restantes en el mazo: {len(deck)}")
-
         # Opciones para el jugador en el juego rápido
         while True:
-            choice = input("¿Continuar jugando el juego rápido (c) o volver al Póker regular (v)? ").strip().lower()
+            choice = input("\n¿Continuar jugando el juego rápido (c) o volver al Póker regular (v)? ").strip().lower()
             if choice == 'c':
                 break # Continúa el bucle while True para otra ronda rápida
             elif choice == 'v':
                 print("Volviendo al juego de Póker regular.")
+                input("Presiona Enter para continuar...") # Pausa para que el usuario lea
                 return False # Indica que el jugador decidió volver
             else:
                 print("Opción inválida. Por favor, ingresa 'c' para continuar o 'v' para volver.")
-
 
 def main():
     print("¡Bienvenido al juego de Póker en Consola!")
