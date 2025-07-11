@@ -129,18 +129,18 @@ def _play_quick_game(deck, player, computer):
     """
     Mecánica de juego rápido de "carta más alta".
     Usa las cartas restantes del mazo de la ronda de póker.
-    Retorna True si el mazo se agotó, False si el jugador decide detenerse.
+    Retorna True si el mazo se agotó, False si el jugador decide detenerse o pierde.
     """
     print("\n--- Iniciando Juego Rápido: ¡Carta Más Alta! ---")
     
     while True:
-        clear_console() # Limpiar la consola al inicio de cada turno rápido
+        clear_console() 
         print("\n--- Juego Rápido: ¡Carta Más Alta! ---")
         print(f"Cartas restantes en el mazo: {len(deck)}")
 
         if len(deck) < 2: # Necesitamos al menos 2 cartas para que cada uno saque una
             print("\n¡El mazo se ha agotado para el juego rápido! Volviendo al Póker regular.")
-            input("Presiona Enter para continuar...") # Pausa para que el usuario lea
+            input("Presiona Enter para continuar...") 
             return True # Indica que el mazo se agotó
 
         input("\nPresiona Enter para sacar una carta...")
@@ -148,10 +148,6 @@ def _play_quick_game(deck, player, computer):
         # Sacar una carta para cada uno
         player_card = deck.deal(1)[0]
         computer_card = deck.deal(1)[0]
-
-        # Mostrar las cartas sacadas usando display_hand de Player
-        # Para esto, necesitamos que Player pueda "mostrar" una sola carta o una lista de cartas
-        # temporalmente. La forma más sencilla es crear una mano temporal para cada uno.
 
         # Mano temporal para el Jugador
         temp_player = Player("Jugador")
@@ -170,22 +166,37 @@ def _play_quick_game(deck, player, computer):
 
         if player_rank_val > computer_rank_val:
             print(f"\n¡El Jugador gana esta ronda rápida con un {VALUE_RANKS.get(player_rank_val, str(player_rank_val))}!")
+            # Si el jugador gana, se le da la opción de continuar
+            while True:
+                choice = input("\n¿Continuar jugando el juego rápido (c) o volver al Póker regular (v)? ").strip().lower()
+                if choice == 'c':
+                    break # Continúa el bucle while True para otra ronda rápida
+                elif choice == 'v':
+                    print("Volviendo al juego de Póker regular.")
+                    input("Presiona Enter para continuar...") 
+                    return False # Indica que el jugador decidió volver
+                else:
+                    print("Opción inválida. Por favor, ingresa 'c' para continuar o 'v' para volver.")
+
         elif computer_rank_val > player_rank_val:
             print(f"\n¡La Computadora gana esta ronda rápida con un {VALUE_RANKS.get(computer_rank_val, str(computer_rank_val))}!")
-        else:
+            print("El juego rápido ha terminado. Volviendo al Póker regular.")
+            input("Presiona Enter para continuar...") # Pausa para que el usuario lea
+            return False # El jugador perdió, se termina el juego rápido
+
+        else: # Empate
             print("\n¡Empate en esta ronda rápida! Ambos sacaron la misma carta.")
-        
-        # Opciones para el jugador en el juego rápido
-        while True:
-            choice = input("\n¿Continuar jugando el juego rápido (c) o volver al Póker regular (v)? ").strip().lower()
-            if choice == 'c':
-                break # Continúa el bucle while True para otra ronda rápida
-            elif choice == 'v':
-                print("Volviendo al juego de Póker regular.")
-                input("Presiona Enter para continuar...") # Pausa para que el usuario lea
-                return False # Indica que el jugador decidió volver
-            else:
-                print("Opción inválida. Por favor, ingresa 'c' para continuar o 'v' para volver.")
+            # Si es empate, se le da la opción de continuar
+            while True:
+                choice = input("\n¿Continuar jugando el juego rápido (c) o volver al Póker regular (v)? ").strip().lower()
+                if choice == 'c':
+                    break # Continúa el bucle while True para otra ronda rápida
+                elif choice == 'v':
+                    print("Volviendo al juego de Póker regular.")
+                    input("Presiona Enter para continuar...") 
+                    return False # Indica que el jugador decidió volver
+                else:
+                    print("Opción inválida. Por favor, ingresa 'c' para continuar o 'v' para volver.")
 
 def main():
     print("¡Bienvenido al juego de Póker en Consola!")
