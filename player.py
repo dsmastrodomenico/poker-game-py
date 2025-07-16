@@ -1,12 +1,13 @@
 # player.py
 
-from hand_evaluator import evaluate_hand, RANK_VALUES # Se mantiene si evaluate_hand es usado internamente por Player, sino se remueve
+from hand_evaluator import evaluate_hand, RANK_VALUES 
 
 class Player:
     """Representa a un jugador (humano o computadora)."""
-    def __init__(self, name="Jugador"):
+    def __init__(self, name="Jugador", initial_chips=1000): # Añadir initial_chips
         self.name = name
         self.hand = []
+        self.chips = initial_chips # NUEVO: Fichas del jugador
 
     def add_cards(self, cards):
         """Añade cartas a la mano del jugador."""
@@ -22,15 +23,14 @@ class Player:
         if marked_for_discard is None:
             marked_for_discard = set() # Inicializa como un set vacío si no se proporciona
 
-        print(f"\n--- Mano de {self.name} ---")
+        # Actualizado para mostrar las fichas del jugador
+        print(f"\n--- Mano de {self.name} (Fichas: {self.chips}) ---") # MODIFICADO
         if not self.hand:
             print("Mano vacía.")
             return
 
         card_lines_list = [] # Lista de listas de líneas ASCII para cada carta
         for i, card in enumerate(self.hand):
-            # Aquí 'card' es una instancia de Card que ya existe en self.hand,
-            # no se necesita importar la clase Card para usar su método.
             card_display_lines = card.display_ascii(hidden=hide_all)
             
             # --- Personalizar la visualización de la carta ---
@@ -62,6 +62,18 @@ class Player:
                 indices_line += f"    ({i+1})    "
             print(indices_line)
     
+    # Método para apostar fichas
+    def bet(self, amount):
+        if self.chips < amount:
+            raise ValueError(f"{self.name} no tiene suficientes fichas para apostar {amount}. Fichas actuales: {self.chips}")
+        self.chips -= amount
+        return amount
+
+    # Método para recibir fichas
+    def receive_chips(self, amount):
+        self.chips += amount
+    
+    # Método para decidir qué cartas descartar (IA básica)
     def decide_cards_to_discard(self):
         """
         [IA Básica] Decide qué cartas descartar de la mano.
